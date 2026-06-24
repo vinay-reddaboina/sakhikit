@@ -1,44 +1,55 @@
 // Centralized API client for talking to the Express backend.
-// All backend calls go through here so we have one place to:
-//   - Set the base URL (changes between dev/prod)
-//   - Add auth tokens (Day 2)
-//   - Handle errors consistently
 
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
-// Generic request helper
-async function request(endpoint, options = {}) {
+// Core request function. Optionally accepts a token to authenticate.
+async function request(endpoint, options = {}, token = null) {
   const url = `${BASE_URL}${endpoint}`;
 
-  const config = {
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
-    ...options,
+  const headers = {
+    'Content-Type': 'application/json',
+    ...options.headers,
   };
+
+  // Attach the JWT as a Bearer token if we have one
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  const config = { ...options, headers };
 
   try {
     const response = await fetch(url, config);
 
     if (!response.ok) {
-      // Server returned 4xx or 5xx
       const errorText = await response.text();
       throw new Error(`API error ${response.status}: ${errorText}`);
     }
 
-    return await response.json();
+    // Some endpoints (like 204 No Content) have no body
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.includes('application/json')) {
+      return await response.json();
+    }
+    return null;
   } catch (error) {
     console.error(`Request failed: ${endpoint}`, error);
     throw error;
   }
 }
 
-// Public API methods — feature-named so consuming components are readable
+// PUBLIC (no auth) endpoints
 export const api = {
-  // Health
   getHealth: () => request('/api/health'),
+};
 
-  // We'll add more methods here as we build features:
-  // getCauses, createDonation, getNGOs, etc.
+// AUTHENTICATED endpoints — these need a token passed in.
+// We expose them as functions that take a token as the last argument.
+export const authApi = {
+  // Sync the logged-in user into our DB (called right after login)
+  syncUser: (token) =>
+    request('/api/users/sync', { method: 'POST' }, token),
+
+  // Get the current user's profile from our DB
+  getMe: (token) => request('/api/users/me', {}, token),
 };
