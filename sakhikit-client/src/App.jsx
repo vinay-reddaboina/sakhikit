@@ -1,65 +1,57 @@
 import { useState, useEffect } from 'react';
+import { useAuth0 } from '@auth0/auth0-react';
 import { api } from './lib/api';
+import AuthButtons from './components/shared/AuthButtons';
 
 function App() {
+  const { user, isAuthenticated } = useAuth0();
   const [serverStatus, setServerStatus] = useState(null);
   const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     api.getHealth()
-      .then((data) => {
-        setServerStatus(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        setError(err.message);
-        setLoading(false);
-      });
+      .then(setServerStatus)
+      .catch((err) => setError(err.message));
   }, []);
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-sakhi-50 p-6">
-      <div className="max-w-2xl w-full">
-        <div className="text-center mb-8">
-          <h1 className="text-5xl font-bold text-sakhi-900 mb-3">
-            SakhiKit
-          </h1>
-          <p className="text-xl text-sakhi-700">
+    <div className="min-h-screen bg-sakhi-50">
+      {/* Navbar */}
+      <nav className="bg-white border-b border-sakhi-100 px-6 py-4 flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-sakhi-900">SakhiKit</h1>
+        <AuthButtons />
+      </nav>
+
+      {/* Main */}
+      <main className="max-w-2xl mx-auto p-6">
+        <div className="text-center mb-8 mt-8">
+          <h2 className="text-4xl font-bold text-sakhi-900 mb-3">
             Fighting period poverty, one kit at a time.
-          </p>
+          </h2>
         </div>
 
+        {isAuthenticated && (
+          <div className="bg-white rounded-lg shadow-md p-6 border border-sakhi-100 mb-4">
+            <h3 className="text-lg font-semibold text-sakhi-900 mb-2">
+              👋 Welcome, {user?.name}
+            </h3>
+            <p className="text-sm text-gray-600">Email: {user?.email}</p>
+          </div>
+        )}
+
         <div className="bg-white rounded-lg shadow-md p-6 border border-sakhi-100">
-          <h2 className="text-lg font-semibold text-sakhi-900 mb-3">
+          <h3 className="text-lg font-semibold text-sakhi-900 mb-3">
             🔌 Server Connection
-          </h2>
-
-          {loading && (
-            <p className="text-gray-500">Checking server status...</p>
-          )}
-
-          {error && (
-            <div className="bg-red-50 border border-red-200 rounded p-3">
-              <p className="text-red-700 font-medium">❌ Connection failed</p>
-              <p className="text-red-600 text-sm mt-1">{error}</p>
-              <p className="text-red-500 text-xs mt-2">
-                Is the server running? <code>cd sakhikit-server && npm run dev</code>
-              </p>
-            </div>
-          )}
-
+          </h3>
+          {error && <p className="text-red-600 text-sm">{error}</p>}
           {serverStatus && (
             <div className="bg-green-50 border border-green-200 rounded p-3">
               <p className="text-green-700 font-medium">✅ Server connected</p>
-              <pre className="text-green-800 text-xs mt-2 overflow-auto">
-                {JSON.stringify(serverStatus, null, 2)}
-              </pre>
             </div>
           )}
         </div>
-      </div>
-    </main>
+      </main>
+    </div>
   );
 }
 
