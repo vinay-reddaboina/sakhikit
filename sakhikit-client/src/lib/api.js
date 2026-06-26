@@ -46,9 +46,15 @@ export const api = {
 // AUTHENTICATED endpoints — these need a token passed in.
 // We expose them as functions that take a token as the last argument.
 export const authApi = {
-  // Sync the logged-in user into our DB (called right after login)
-  syncUser: (token) =>
-    request('/api/users/sync', { method: 'POST' }, token),
+  // Sync the logged-in user into our DB (called right after login).
+  // The access token only carries the Auth0 user id, so we send the
+  // profile fields (from the ID token) in the body.
+  syncUser: (token, profile) =>
+    request(
+      '/api/users/sync',
+      { method: 'POST', body: JSON.stringify(profile) },
+      token
+    ),
 
   // Get the current user's profile from our DB
   getMe: (token) => request('/api/users/me', {}, token),
