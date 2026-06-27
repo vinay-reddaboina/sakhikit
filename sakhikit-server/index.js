@@ -24,8 +24,6 @@ app.use(express.json());
 
 // API routes
 app.use('/api/health', healthRoutes);
-// API routes
-app.use('/api/health', healthRoutes);
 app.use('/api/users', userRoutes);
 
 // Root route — quick check the server is alive
