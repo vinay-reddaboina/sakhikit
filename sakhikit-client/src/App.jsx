@@ -1,78 +1,103 @@
-import { useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
-import { api } from './lib/api';
 import { useApi } from './lib/useApi';
 import AuthButtons from './components/shared/AuthButtons';
+import CausesPage from './pages/CausesPage';
+import CauseDetailPage from './pages/CauseDetailPage';
+import RegisterNGOPage from './pages/RegisterNGOPage';
+import AdminDashboardPage from './pages/AdminDashboardPage';
+import NGODashboardPage from './pages/NGODashboardPage';
+import CreateCausePage from './pages/CreateCausePage';
+import { api } from './lib/api';
 
-function App() {
-  const { user, isAuthenticated, isLoading } = useAuth0();
-  const { syncUser } = useApi();
-  const [serverStatus, setServerStatus] = useState(null);
-  const [dbUser, setDbUser] = useState(null);
-  const [error, setError] = useState(null);
+function Navbar({ dbUser }) {
+  const { isAuthenticated } = useAuth0();
+  return (
+    <nav className="bg-white border-b border-sakhi-100 px-6 py-4 flex items-center justify-between sticky top-0 z-10">
+      <Link to="/" className="text-2xl font-bold text-sakhi-900">SakhiKit</Link>
+      <div className="flex items-center gap-6">
+        <Link to="/causes" className="text-sakhi-700 hover:text-sakhi-900 font-medium text-sm">
+          Browse Causes
+        </Link>
+        {isAuthenticated && dbUser?.role === 'platform_admin' && (
+          <Link to="/admin" className="text-sakhi-700 hover:text-sakhi-900 font-medium text-sm">
+            Admin
+          </Link>
+        )}
+        {isAuthenticated && dbUser?.role === 'ngo_admin' && (
+          <Link to="/ngo-dashboard" className="text-sakhi-700 hover:text-sakhi-900 font-medium text-sm">
+            NGO Dashboard
+          </Link>
+        )}
+        {isAuthenticated && dbUser?.role === 'donor' && (
+          <Link to="/register-ngo" className="text-sakhi-700 hover:text-sakhi-900 font-medium text-sm">
+            Register NGO
+          </Link>
+        )}
+        <AuthButtons />
+      </div>
+    </nav>
+  );
+}
 
-  // Check server is alive (public)
-  useEffect(() => {
-    api.getHealth()
-      .then(setServerStatus)
-      .catch((err) => setError(err.message));
-  }, []);
-
-  // Sync user into our DB once authenticated
-  useEffect(() => {
-    if (isAuthenticated) {
-      syncUser()
-        .then((res) => setDbUser(res.user))
-        .catch((err) => console.error('Sync failed:', err.message));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuthenticated]);
-
+function HomePage({ dbUser }) {
   return (
     <div className="min-h-screen bg-sakhi-50">
-      <nav className="bg-white border-b border-sakhi-100 px-6 py-4 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-sakhi-900">SakhiKit</h1>
-        <AuthButtons />
-      </nav>
-
-      <main className="max-w-2xl mx-auto p-6">
-        <div className="text-center mb-8 mt-8">
-          <h2 className="text-4xl font-bold text-sakhi-900 mb-3">
-            Fighting period poverty, one kit at a time.
-          </h2>
-        </div>
-
-        {isAuthenticated && (
-          <div className="bg-white rounded-lg shadow-md p-6 border border-sakhi-100 mb-4">
-            <h3 className="text-lg font-semibold text-sakhi-900 mb-2">
-              👋 Welcome, {user?.name}
-            </h3>
-            <p className="text-sm text-gray-600 mb-2">Email: {user?.email}</p>
-            {dbUser && (
-              <div className="bg-sakhi-50 rounded p-3 mt-2">
-                <p className="text-sm text-sakhi-700">
-                  ✅ Synced to database · Role:{' '}
-                  <span className="font-semibold">{dbUser.role}</span>
-                </p>
-              </div>
-            )}
+      <div className="max-w-4xl mx-auto px-6 py-20 text-center">
+        <h1 className="text-5xl font-bold text-sakhi-900 mb-6 leading-tight">
+          Fighting period poverty,<br />one kit at a time.
+        </h1>
+        <p className="text-xl text-sakhi-700 mb-10 max-w-2xl mx-auto">
+          23 million girls drop out of school every year due to lack of menstrual hygiene.
+          SakhiKit connects donors with verified NGOs to change that.
+        </p>
+        <Link
+          to="/causes"
+          className="inline-block bg-sakhi-700 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-sakhi-900 transition"
+        >
+          Browse Active Causes →
+        </Link>
+      </div>
+      {dbUser && (
+        <div className="max-w-xl mx-auto px-6 pb-10">
+          <div className="bg-white rounded-lg border border-sakhi-100 p-4 text-center">
+            <p className="text-sakhi-700 text-sm">
+              ✅ Logged in · Role:{' '}
+              <span className="font-semibold">{dbUser.role}</span>
+            </p>
           </div>
-        )}
-
-        <div className="bg-white rounded-lg shadow-md p-6 border border-sakhi-100">
-          <h3 className="text-lg font-semibold text-sakhi-900 mb-3">
-            🔌 Server Connection
-          </h3>
-          {error && <p className="text-red-600 text-sm">{error}</p>}
-          {serverStatus && (
-            <div className="bg-green-50 border border-green-200 rounded p-3">
-              <p className="text-green-700 font-medium">✅ Server connected</p>
-            </div>
-          )}
         </div>
-      </main>
+      )}
     </div>
   );
 }
 
-export default App;
+export default function App() {
+  const { isAuthenticated } = useAuth0();
+  const { syncUser } = useApi();
+  const [dbUser, setDbUser] = useState(null);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      syncUser()
+        .then((res) => setDbUser(res.user))
+        .catch(console.error);
+    }
+  }, [isAuthenticated]);
+
+  return (
+    <BrowserRouter>
+      <Navbar dbUser={dbUser} />
+      <Routes>
+        <Route path="/" element={<HomePage dbUser={dbUser} />} />
+        <Route path="/causes" element={<CausesPage />} />
+        <Route path="/causes/:id" element={<CauseDetailPage />} />
+        <Route path="/register-ngo" element={<RegisterNGOPage />} />
+        <Route path="/admin" element={<AdminDashboardPage />} />
+        <Route path="/ngo-dashboard" element={<NGODashboardPage />} />
+        <Route path="/create-cause" element={<CreateCausePage />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}

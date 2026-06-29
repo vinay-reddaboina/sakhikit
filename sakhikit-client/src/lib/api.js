@@ -1,32 +1,17 @@
-// Centralized API client for talking to the Express backend.
-
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
-// Core request function. Optionally accepts a token to authenticate.
 async function request(endpoint, options = {}, token = null) {
   const url = `${BASE_URL}${endpoint}`;
-
-  const headers = {
-    'Content-Type': 'application/json',
-    ...options.headers,
-  };
-
-  // Attach the JWT as a Bearer token if we have one
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
-  }
-
+  const headers = { 'Content-Type': 'application/json', ...options.headers };
+  if (token) headers.Authorization = `Bearer ${token}`;
   const config = { ...options, headers };
 
   try {
     const response = await fetch(url, config);
-
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(`API error ${response.status}: ${errorText}`);
     }
-
-    // Some endpoints (like 204 No Content) have no body
     const contentType = response.headers.get('content-type');
     if (contentType && contentType.includes('application/json')) {
       return await response.json();
@@ -38,18 +23,29 @@ async function request(endpoint, options = {}, token = null) {
   }
 }
 
-// PUBLIC (no auth) endpoints
+// Public
 export const api = {
   getHealth: () => request('/api/health'),
+  getCauses: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return request(`/api/causes?${query}`);
+  },
+  getCauseById: (id) => request(`/api/causes/${id}`),
+  getCauseStats: () => request('/api/causes/stats'),
+  getVerifiedNGOs: () => request('/api/ngos'),
+  getNGOById: (id) => request(`/api/ngos/${id}`),
 };
 
-// AUTHENTICATED endpoints — these need a token passed in.
-// We expose them as functions that take a token as the last argument.
+// Authenticated
 export const authApi = {
-  // Sync the logged-in user into our DB (called right after login)
-  syncUser: (token) =>
-    request('/api/users/sync', { method: 'POST' }, token),
-
-  // Get the current user's profile from our DB
+  syncUser: (token) => request('/api/users/sync', { method: 'POST' }, token),
   getMe: (token) => request('/api/users/me', {}, token),
+  registerNGO: (token, data) => request('/api/ngos', { method: 'POST', body: JSON.stringify(data) }, token),
+  getMyNGO: (token) => request('/api/ngos/mine', {}, token),
+  getPendingNGOs: (token) => request('/api/ngos/pending', {}, token),
+  verifyNGO: (token, id, data) => request(`/api/ngos/${id}/verify`, { method: 'PATCH', body: JSON.stringify(data) }, token),
+  createCause: (token, data) => request('/api/causes', { method: 'POST', body: JSON.stringify(data) }, token),
+  getMyCauses: (token) => request('/api/causes/ngo/mine', {}, token),
+  updateCause: (token, id, data) => request(`/api/causes/${id}`, { method: 'PATCH', body: JSON.stringify(data) }, token),
+  deleteCause: (token, id) => request(`/api/causes/${id}`, { method: 'DELETE' }, token),
 };

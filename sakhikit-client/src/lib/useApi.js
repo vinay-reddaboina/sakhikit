@@ -1,20 +1,24 @@
 import { useAuth0 } from '@auth0/auth0-react';
 import { authApi } from './api';
 
-// Hook that wraps authApi calls, automatically fetching a fresh token each time.
 export function useApi() {
   const { getAccessTokenSilently } = useAuth0();
 
-  // Wrap each authApi method so callers don't deal with tokens directly.
-  const syncUser = async () => {
+  const withToken = (fn) => async (...args) => {
     const token = await getAccessTokenSilently();
-    return authApi.syncUser(token);
+    return fn(token, ...args);
   };
 
-  const getMe = async () => {
-    const token = await getAccessTokenSilently();
-    return authApi.getMe(token);
+  return {
+    syncUser: withToken(authApi.syncUser),
+    getMe: withToken(authApi.getMe),
+    registerNGO: withToken(authApi.registerNGO),
+    getMyNGO: withToken(authApi.getMyNGO),
+    getPendingNGOs: withToken(authApi.getPendingNGOs),
+    verifyNGO: withToken(authApi.verifyNGO),
+    createCause: withToken(authApi.createCause),
+    getMyCauses: withToken(authApi.getMyCauses),
+    updateCause: withToken(authApi.updateCause),
+    deleteCause: withToken(authApi.deleteCause),
   };
-
-  return { syncUser, getMe };
 }
