@@ -5,9 +5,12 @@ import { useNavigate } from 'react-router-dom';
 
 export default function PostImpactUpdatePage() {
   const { isAuthenticated, getAccessTokenSilently } = useAuth0();
-  const { getMyCauses, createImpactUpdate } = useApi();
+  const { getMyCauses, getMyNGO, createImpactUpdate } = useApi();
   const navigate = useNavigate();
   const [causes, setCauses] = useState([]);
+  const [ngo, setNgo] = useState(null);
+  const [initLoading, setInitLoading] = useState(true);
+  const [authError, setAuthError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -23,9 +26,21 @@ export default function PostImpactUpdatePage() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      getMyCauses()
-        .then((data) => setCauses(data.causes || []))
-        .catch(console.error);
+      Promise.all([getMyCauses(), getMyNGO()])
+        .then(([causesData, ngoData]) => {
+          setCauses(causesData.causes || []);
+          setNgo(ngoData.ngo);
+          if (ngoData.ngo?.verificationStatus !== 'verified') {
+            setAuthError('Your NGO must be verified to post impact updates.');
+          }
+          setInitLoading(false);
+        })
+        .catch((err) => {
+          setAuthError('You must be a verified NGO administrator to post impact updates.');
+          setInitLoading(false);
+        });
+    } else {
+      setInitLoading(false);
     }
   }, [isAuthenticated]);
 
@@ -72,6 +87,32 @@ export default function PostImpactUpdatePage() {
       setLoading(false);
     }
   };
+
+  if (initLoading) return (
+    <div className="min-h-screen bg-sakhi-50 flex items-center justify-center">
+      <p className="text-sakhi-700">Loading...</p>
+    </div>
+  );
+
+  if (!isAuthenticated) return (
+    <div className="min-h-screen bg-sakhi-50 flex items-center justify-center">
+      <p className="text-gray-500">Please log in to post impact updates.</p>
+    </div>
+  );
+
+  if (authError) return (
+    <div className="min-h-screen bg-sakhi-50 flex items-center justify-center p-6">
+      <div className="bg-white rounded-xl p-8 text-center max-w-md shadow-md border border-sakhi-100">
+        <p className="text-4xl mb-4">🔒</p>
+        <h2 className="text-xl font-bold text-sakhi-900 mb-2">Access Denied</h2>
+        <p className="text-gray-600 mb-6">{authError}</p>
+        <button onClick={() => navigate('/')}
+          className="bg-sakhi-700 text-white px-6 py-2 rounded-lg font-semibold hover:bg-sakhi-900 transition">
+          Go Home
+        </button>
+      </div>
+    </div>
+  );
 
   if (success) return (
     <div className="min-h-screen bg-sakhi-50 flex items-center justify-center">
