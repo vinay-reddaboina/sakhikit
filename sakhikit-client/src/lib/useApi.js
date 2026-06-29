@@ -20,5 +20,8 @@ export function useApi() {
     getMyCauses: withToken(authApi.getMyCauses),
     updateCause: withToken(authApi.updateCause),
     deleteCause: withToken(authApi.deleteCause),
+    createPaymentIntent: withToken(authApi.createPaymentIntent),
+    createSubscription: withToken(authApi.createSubscription),
+    getMyDonations: withToken(authApi.getMyDonations),
   };
 }

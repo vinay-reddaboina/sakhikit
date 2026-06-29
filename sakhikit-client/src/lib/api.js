@@ -36,7 +36,6 @@ export const api = {
   getNGOById: (id) => request(`/api/ngos/${id}`),
 };
 
-// Authenticated
 export const authApi = {
   syncUser: (token) => request('/api/users/sync', { method: 'POST' }, token),
   getMe: (token) => request('/api/users/me', {}, token),
@@ -48,4 +47,7 @@ export const authApi = {
   getMyCauses: (token) => request('/api/causes/ngo/mine', {}, token),
   updateCause: (token, id, data) => request(`/api/causes/${id}`, { method: 'PATCH', body: JSON.stringify(data) }, token),
   deleteCause: (token, id) => request(`/api/causes/${id}`, { method: 'DELETE' }, token),
+  createPaymentIntent: (token, data) => request('/api/donations/create-payment-intent', { method: 'POST', body: JSON.stringify(data) }, token),
+  createSubscription: (token, data) => request('/api/donations/create-subscription', { method: 'POST', body: JSON.stringify(data) }, token),
+  getMyDonations: (token) => request('/api/donations/my', {}, token),
 };

@@ -9,7 +9,7 @@ import RegisterNGOPage from './pages/RegisterNGOPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 import NGODashboardPage from './pages/NGODashboardPage';
 import CreateCausePage from './pages/CreateCausePage';
-import { api } from './lib/api';
+import DonorDashboardPage from './pages/DonorDashboardPage';
 
 function Navbar({ dbUser }) {
   const { isAuthenticated } = useAuth0();
@@ -31,9 +31,14 @@ function Navbar({ dbUser }) {
           </Link>
         )}
         {isAuthenticated && dbUser?.role === 'donor' && (
-          <Link to="/register-ngo" className="text-sakhi-700 hover:text-sakhi-900 font-medium text-sm">
-            Register NGO
-          </Link>
+          <>
+            <Link to="/my-donations" className="text-sakhi-700 hover:text-sakhi-900 font-medium text-sm">
+              My Donations
+            </Link>
+            <Link to="/register-ngo" className="text-sakhi-700 hover:text-sakhi-900 font-medium text-sm">
+              Register NGO
+            </Link>
+          </>
         )}
         <AuthButtons />
       </div>
@@ -97,6 +102,7 @@ export default function App() {
         <Route path="/admin" element={<AdminDashboardPage />} />
         <Route path="/ngo-dashboard" element={<NGODashboardPage />} />
         <Route path="/create-cause" element={<CreateCausePage />} />
+        <Route path="/my-donations" element={<DonorDashboardPage />} />
       </Routes>
     </BrowserRouter>
   );
