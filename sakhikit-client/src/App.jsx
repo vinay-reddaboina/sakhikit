@@ -84,6 +84,24 @@ function HomePage({ dbUser }) {
           </div>
         </div>
       )}
+
+      {/* NGO Call to Action Card */}
+      <div className="max-w-4xl mx-auto px-6 pb-20">
+        <div className="bg-sakhi-900 text-white rounded-2xl p-8 md:p-12 text-center md:text-left md:flex md:items-center md:justify-between shadow-lg">
+          <div className="mb-6 md:mb-0 md:max-w-xl">
+            <h2 className="text-2xl md:text-3xl font-bold mb-3 text-sakhi-50">Represent an NGO?</h2>
+            <p className="text-sakhi-200 text-sm md:text-base leading-relaxed">
+              Register your organization to start creating hygiene causes, receiving sponsored kits, and logging your distribution impact on the map.
+            </p>
+          </div>
+          <Link
+            to="/register-ngo"
+            className="inline-block bg-white text-sakhi-950 px-6 py-3 rounded-lg font-semibold hover:bg-sakhi-50 transition shrink-0 ml-0 md:ml-6"
+          >
+            Register Your NGO
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }
