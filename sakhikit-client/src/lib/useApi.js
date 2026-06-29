@@ -23,5 +23,7 @@ export function useApi() {
     createPaymentIntent: withToken(authApi.createPaymentIntent),
     createSubscription: withToken(authApi.createSubscription),
     getMyDonations: withToken(authApi.getMyDonations),
+    createImpactUpdate: withToken(authApi.createImpactUpdate),
+    uploadPhoto: withToken(authApi.uploadPhoto),
   };
 }

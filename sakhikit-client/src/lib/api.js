@@ -34,6 +34,8 @@ export const api = {
   getCauseStats: () => request('/api/causes/stats'),
   getVerifiedNGOs: () => request('/api/ngos'),
   getNGOById: (id) => request(`/api/ngos/${id}`),
+  getImpactByCause: (causeId) => request(`/api/impact/cause/${causeId}`),
+  getAllImpactUpdates: () => request('/api/impact/all'),
 };
 
 export const authApi = {
@@ -50,4 +52,13 @@ export const authApi = {
   createPaymentIntent: (token, data) => request('/api/donations/create-payment-intent', { method: 'POST', body: JSON.stringify(data) }, token),
   createSubscription: (token, data) => request('/api/donations/create-subscription', { method: 'POST', body: JSON.stringify(data) }, token),
   getMyDonations: (token) => request('/api/donations/my', {}, token),
+  createImpactUpdate: (token, data) => request('/api/impact', { method: 'POST', body: JSON.stringify(data) }, token),
+  uploadPhoto: (token, formData) => {
+    const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+    return fetch(`${BASE_URL}/api/impact/upload-photo`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: formData,
+    }).then((r) => r.json());
+  },
 };

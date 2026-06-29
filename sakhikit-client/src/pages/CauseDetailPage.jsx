@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { api } from '../lib/api';
 import DonationModal from '../components/shared/DonationModal';
+import ImpactUpdates from '../components/shared/ImpactUpdates';
 
 export default function CauseDetailPage() {
   const { id } = useParams();
@@ -46,7 +47,7 @@ export default function CauseDetailPage() {
             <p className="text-gray-600 leading-relaxed mb-6">{cause.description}</p>
 
             {cause.ngoId && (
-              <div className="bg-white rounded-lg p-4 border border-sakhi-100">
+              <div className="bg-white rounded-lg p-4 border border-sakhi-100 mb-6">
                 <p className="text-sm text-gray-500 mb-1">Organised by</p>
                 <p className="font-semibold text-sakhi-900">{cause.ngoId.name}</p>
                 {cause.ngoId.location?.city && (
@@ -56,6 +57,8 @@ export default function CauseDetailPage() {
                 )}
               </div>
             )}
+
+            <ImpactUpdates causeId={id} />
           </div>
 
           <div className="bg-white rounded-xl shadow-md p-6 border border-sakhi-100 h-fit">

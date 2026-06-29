@@ -10,6 +10,8 @@ import AdminDashboardPage from './pages/AdminDashboardPage';
 import NGODashboardPage from './pages/NGODashboardPage';
 import CreateCausePage from './pages/CreateCausePage';
 import DonorDashboardPage from './pages/DonorDashboardPage';
+import ImpactMapPage from './pages/ImpactMapPage';
+import PostImpactUpdatePage from './pages/PostImpactUpdatePage';
 
 function Navbar({ dbUser }) {
   const { isAuthenticated } = useAuth0();
@@ -20,15 +22,23 @@ function Navbar({ dbUser }) {
         <Link to="/causes" className="text-sakhi-700 hover:text-sakhi-900 font-medium text-sm">
           Browse Causes
         </Link>
+        <Link to="/impact-map" className="text-sakhi-700 hover:text-sakhi-900 font-medium text-sm">
+          Impact Map
+        </Link>
         {isAuthenticated && dbUser?.role === 'platform_admin' && (
           <Link to="/admin" className="text-sakhi-700 hover:text-sakhi-900 font-medium text-sm">
             Admin
           </Link>
         )}
         {isAuthenticated && dbUser?.role === 'ngo_admin' && (
-          <Link to="/ngo-dashboard" className="text-sakhi-700 hover:text-sakhi-900 font-medium text-sm">
-            NGO Dashboard
-          </Link>
+          <>
+            <Link to="/ngo-dashboard" className="text-sakhi-700 hover:text-sakhi-900 font-medium text-sm">
+              NGO Dashboard
+            </Link>
+            <Link to="/post-update" className="text-sakhi-700 hover:text-sakhi-900 font-medium text-sm">
+              Post Update
+            </Link>
+          </>
         )}
         {isAuthenticated && dbUser?.role === 'donor' && (
           <>
@@ -103,6 +113,8 @@ export default function App() {
         <Route path="/ngo-dashboard" element={<NGODashboardPage />} />
         <Route path="/create-cause" element={<CreateCausePage />} />
         <Route path="/my-donations" element={<DonorDashboardPage />} />
+        <Route path="/impact-map" element={<ImpactMapPage />} />
+        <Route path="/post-update" element={<PostImpactUpdatePage />} />
       </Routes>
     </BrowserRouter>
   );
